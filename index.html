@@ -6,23 +6,34 @@
   <title>Phishing URL Detector</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #141e30, #243b55);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: #0f2027;
+      background: linear-gradient(to bottom, #2c5364, #203a43, #0f2027);
+      overflow: hidden;
       color: #f0f0f0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
     .container {
-      background: rgba(0, 0, 0, 0.75);
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
       padding: 30px;
-      border-radius: 12px;
+      border-radius: 15px;
       max-width: 500px;
-      width: 100%;
+      width: 90%;
       text-align: center;
-      box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
     }
     input[type="text"] {
       width: 100%;
@@ -30,45 +41,54 @@
       border-radius: 8px;
       border: none;
       font-size: 16px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      background: #00e6e6;
-      color: #1e1e1e;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #50fa7b;
+      margin-bottom: 15px;
     }
     #result {
       margin-top: 20px;
       font-size: 16px;
       padding: 15px;
-      border-radius: 8px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+    }
+    .footer {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .footer a {
+      color: #00e6e6;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <canvas id="stars"></canvas>
   <div class="container">
-    <h2>Phishing URL Detector</h2>
-    <input type="text" id="urlInput" placeholder="Enter a URL to check...">
-    <button onclick="checkURL()">Check</button>
+    <h2>🔎 Live Phishing URL Detector</h2>
+    <input type="text" id="urlInput" placeholder="Type or paste a URL...">
     <div id="result"></div>
+    <div class="footer">
+      Created by <a href="https://www.linkedin.com/in/mouayed-ibrahim/" target="_blank">Mouayed Ibrahim</a>
+    </div>
   </div>
-
   <script>
     const suspiciousTLDs = ['.ru', '.tk', '.xyz', '.top', '.cf'];
     const shortenedServices = ['bit.ly', 'tinyurl.com', 'goo.gl', 't.co', 'ow.ly'];
     const blacklist = ['g00gle.com', 'amaz0n.net', 'faceb00k.org'];
 
+    const inputField = document.getElementById("urlInput");
+    const resultBox = document.getElementById("result");
+
+    inputField.addEventListener("input", checkURL);
+
     function checkURL() {
-      const input = document.getElementById("urlInput").value.trim().toLowerCase();
-      const resultBox = document.getElementById("result");
+      const input = inputField.value.trim().toLowerCase();
+      if (!input) {
+        resultBox.textContent = '';
+        resultBox.style.background = 'transparent';
+        return;
+      }
+
       let message = '';
       let danger = false;
 
@@ -100,17 +120,49 @@
 
         if (!danger && message === '') {
           message = '✅ No major red flags detected. Stay vigilant!';
-          resultBox.style.background = '#3cb371';
+          resultBox.style.background = '#228B22';
         } else {
-          resultBox.style.background = '#b22222';
+          resultBox.style.background = '#8B0000';
         }
 
         resultBox.textContent = message;
       } catch (e) {
         resultBox.textContent = '❌ Invalid URL format.';
-        resultBox.style.background = '#b22222';
+        resultBox.style.background = '#8B0000';
       }
     }
+
+    // Starry background
+    const canvas = document.getElementById("stars");
+    const ctx = canvas.getContext("2d");
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.5
+      });
+    }
+
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      for (let star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(animateStars);
+    }
+    animateStars();
   </script>
 </body>
 </html>
