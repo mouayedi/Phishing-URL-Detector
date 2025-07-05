@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing URL Detector</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #00e6e6;
+      color: #1e1e1e;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #50fa7b;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 16px;
+      padding: 15px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Phishing URL Detector</h2>
+    <input type="text" id="urlInput" placeholder="Enter a URL to check...">
+    <button onclick="checkURL()">Check</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const suspiciousTLDs = ['.ru', '.tk', '.xyz', '.top', '.cf'];
+    const shortenedServices = ['bit.ly', 'tinyurl.com', 'goo.gl', 't.co', 'ow.ly'];
+    const blacklist = ['g00gle.com', 'amaz0n.net', 'faceb00k.org'];
+
+    function checkURL() {
+      const input = document.getElementById("urlInput").value.trim().toLowerCase();
+      const resultBox = document.getElementById("result");
+      let message = '';
+      let danger = false;
+
+      try {
+        const url = new URL(input.startsWith('http') ? input : 'https://' + input);
+        const hostname = url.hostname;
+        const tld = hostname.slice(hostname.lastIndexOf('.'));
+
+        if (shortenedServices.some(domain => hostname.includes(domain))) {
+          message += '⚠️ This appears to be a shortened URL. Be cautious.\n';
+          danger = true;
+        }
+
+        if (blacklist.includes(hostname)) {
+          message += '🛑 This domain is blacklisted as malicious.\n';
+          danger = true;
+        }
+
+        suspiciousTLDs.forEach(suffix => {
+          if (hostname.endsWith(suffix)) {
+            message += `⚠️ The top-level domain ${suffix} is often used in phishing campaigns.\n`;
+            danger = true;
+          }
+        });
+
+        if (!input.startsWith("https://")) {
+          message += '🔓 The site is not using HTTPS.\n';
+        }
+
+        if (!danger && message === '') {
+          message = '✅ No major red flags detected. Stay vigilant!';
+          resultBox.style.background = '#3cb371';
+        } else {
+          resultBox.style.background = '#b22222';
+        }
+
+        resultBox.textContent = message;
+      } catch (e) {
+        resultBox.textContent = '❌ Invalid URL format.';
+        resultBox.style.background = '#b22222';
+      }
+    }
+  </script>
+</body>
+</html>
